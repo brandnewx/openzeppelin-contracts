@@ -28,7 +28,7 @@ import "../../utils/introspection/IERC1820Registry.sol";
 contract ERC777 is Context, IERC777, IERC20 {
     using Address for address;
 
-    // IERC1820Registry constant internal _ERC1820_REGISTRY = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
+    IERC1820Registry constant internal _ERC1820_REGISTRY = IERC1820Registry(0x92f9CE9f77E231a5bfAB0da1a2d34c1865443c14);
 
     mapping(address => uint256) internal _balances;
 
@@ -70,8 +70,8 @@ contract ERC777 is Context, IERC777, IERC20 {
         }
 
         // register interfaces
-        // _ERC1820_REGISTRY.setInterfaceImplementer(address(this), keccak256("ERC777Token"), address(this));
-        // _ERC1820_REGISTRY.setInterfaceImplementer(address(this), keccak256("ERC20Token"), address(this));
+        _ERC1820_REGISTRY.setInterfaceImplementer(address(this), keccak256("ERC777Token"), address(this));
+        _ERC1820_REGISTRY.setInterfaceImplementer(address(this), keccak256("ERC20Token"), address(this));
     }
 
     /**
@@ -479,10 +479,10 @@ contract ERC777 is Context, IERC777, IERC20 {
     )
         private
     {
-        // address implementer = _ERC1820_REGISTRY.getInterfaceImplementer(from, _TOKENS_SENDER_INTERFACE_HASH);
-        // if (implementer != address(0)) {
-        //     IERC777Sender(implementer).tokensToSend(operator, from, to, amount, userData, operatorData);
-        // }
+        address implementer = _ERC1820_REGISTRY.getInterfaceImplementer(from, _TOKENS_SENDER_INTERFACE_HASH);
+        if (implementer != address(0)) {
+            IERC777Sender(implementer).tokensToSend(operator, from, to, amount, userData, operatorData);
+        }
     }
 
     /**
@@ -507,12 +507,12 @@ contract ERC777 is Context, IERC777, IERC20 {
     )
         private
     {
-        // address implementer = _ERC1820_REGISTRY.getInterfaceImplementer(to, _TOKENS_RECIPIENT_INTERFACE_HASH);
-        // if (implementer != address(0)) {
-        //     IERC777Recipient(implementer).tokensReceived(operator, from, to, amount, userData, operatorData);
-        // } else if (requireReceptionAck) {
-        //     require(!to.isContract(), "ERC777: token recipient contract has no implementer for ERC777TokensRecipient");
-        // }
+        address implementer = _ERC1820_REGISTRY.getInterfaceImplementer(to, _TOKENS_RECIPIENT_INTERFACE_HASH);
+        if (implementer != address(0)) {
+            IERC777Recipient(implementer).tokensReceived(operator, from, to, amount, userData, operatorData);
+        } else if (requireReceptionAck) {
+            require(!to.isContract(), "ERC777: token recipient contract has no implementer for ERC777TokensRecipient");
+        }
     }
 
     /**

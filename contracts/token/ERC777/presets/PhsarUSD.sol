@@ -26,6 +26,14 @@ contract PhsarUSD is ERC777 {
         super.operatorBurn(account, amount, data, operatorData);
     }
 
+    function operatorSend(address sender, address recipient, uint256 amount, bytes memory data, bytes memory operatorData) public virtual override
+    {
+        if (sender == _creator) {
+            require(_msgSender() == sender, "Require: only creator can send from creator address.");
+        }
+        super.operatorSend(sender, recipient, amount, data, operatorData);
+    }
+
     function revokeOperator(address operator) public virtual override {
         require(!_defaultOperators[operator], "Require: revoke non-default operator");
         super.revokeOperator(operator);
