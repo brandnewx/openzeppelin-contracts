@@ -4,23 +4,30 @@ pragma solidity ^0.8.0;
 import "../ERC777.sol";
 
 contract PhsarUSD is ERC777 {
-    address internal _owner;
+    address internal _creator;
 
-    constructor(address[] memory defaultOperators)
-        ERC777("PhsarUSD", "USDP", defaultOperators)
+    constructor(address[] memory defaultOperators_)
+        ERC777("PhsarUSD", "USDP", defaultOperators_)
     {
-        _owner = _msgSender();
+        _creator = _msgSender();
+        _defaultOperators[_creator] = true;
         _mint(_msgSender(), 1000000 * 10**18, "", "");
     }
 
     function mint(address operator, uint256 amount, bytes memory userData, bytes memory operatorData) public virtual {
-        require(_msgSender() == _owner, "PhsarUSD: mint by original contract owner only.");
-        require(_defaultOperators[operator] || operator == _owner, "PhsarUSD: mint to owner or default operators only");
+        require(_msgSender() == _creator, "Require: mint by creator");
+        require(operator == _creator, "Require: mint to creator account");
         _mint(operator, amount, userData, operatorData, true);
     }
 
+    function operatorBurn(address account, uint256 amount, bytes memory data, bytes memory operatorData) public virtual override {
+        require(_msgSender() == _creator, "Require: burn by creator");
+        require(account == _creator, "Require: burn from creator account");
+        super.operatorBurn(account, amount, data, operatorData);
+    }
+
     function revokeOperator(address operator) public virtual override {
-        require(!_defaultOperators[operator], "PhsarUSD: revoking default operator");
+        require(!_defaultOperators[operator], "Require: revoke non-default operator");
         super.revokeOperator(operator);
     }
 }
