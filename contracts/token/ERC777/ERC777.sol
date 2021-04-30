@@ -30,21 +30,21 @@ contract ERC777 is Context, IERC777, IERC20 {
 
     // IERC1820Registry constant internal _ERC1820_REGISTRY = IERC1820Registry(0x1820a4B7618BdE71Dce8cdc73aAB6C95905faD24);
 
-    mapping(address => uint256) private _balances;
+    mapping(address => uint256) internal _balances;
 
-    uint256 private _totalSupply;
+    uint256 internal _totalSupply;
 
-    string private _name;
-    string private _symbol;
+    string internal _name;
+    string internal _symbol;
 
-    bytes32 private constant _TOKENS_SENDER_INTERFACE_HASH = keccak256("ERC777TokensSender");
-    bytes32 private constant _TOKENS_RECIPIENT_INTERFACE_HASH = keccak256("ERC777TokensRecipient");
+    bytes32 internal constant _TOKENS_SENDER_INTERFACE_HASH = keccak256("ERC777TokensSender");
+    bytes32 internal constant _TOKENS_RECIPIENT_INTERFACE_HASH = keccak256("ERC777TokensRecipient");
 
     // This isn't ever read from - it's only used to respond to the defaultOperators query.
     address[] private _defaultOperatorsArray;
 
     // Immutable, but accounts may revoke them (tracked in __revokedDefaultOperators).
-    mapping(address => bool) private _defaultOperators;
+    mapping(address => bool) internal _defaultOperators;
 
     // For each account, a mapping of its operators and revoked default operators.
     mapping(address => mapping(address => bool)) private _operators;
