@@ -1,9 +1,12 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.0;
 
+import "./IPhsarUSD.sol";
 import "../ERC777.sol";
 
-contract PhsarUSD is ERC777 {
+contract PhsarUSD is ERC777, IPhsarUSD {
+    using Address for address;
+    
     address internal _creator;
 
     constructor(address[] memory defaultOperators_)
@@ -14,7 +17,7 @@ contract PhsarUSD is ERC777 {
         _mint(_msgSender(), 1000000 * 10**18, "", "");
     }
 
-    function mint(address operator, uint256 amount, bytes memory userData, bytes memory operatorData) public virtual {
+    function mint(address operator, uint256 amount, bytes memory userData, bytes memory operatorData) public virtual override(IPhsarUSD) {
         require(_msgSender() == _creator, "Require: mint by creator");
         require(operator == _creator, "Require: mint to creator account");
         _mint(operator, amount, userData, operatorData, true);
