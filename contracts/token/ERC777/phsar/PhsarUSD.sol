@@ -12,7 +12,7 @@ contract PhsarUSD is ERC777, IPhsarUSD {
     address internal _validator;
 
     constructor(address[] memory defaultOperators_, address validator_)
-        ERC777("PhsarUSD", "USDP", defaultOperators_)
+        ERC777("PhsarUSD", "$", defaultOperators_)
     {
         _creator = _msgSender();
         _defaultOperators[_creator] = true;
@@ -40,8 +40,14 @@ contract PhsarUSD is ERC777, IPhsarUSD {
         super.operatorSend(sender, recipient, amount, data, operatorData);
     }
 
+    function authorizeOperator(address operator) public virtual override {
+        ITransactionValidator(_validator).beforeAuthorizeOperator(operator, _msgSender());
+        super.authorizeOperator(operator);
+    }
+
     function revokeOperator(address operator) public virtual override {
         require(!_defaultOperators[operator], "Require: revoke non-default operator");
+        ITransactionValidator(_validator).beforeRevokeOperator(operator, _msgSender());
         super.revokeOperator(operator);
     }
 
