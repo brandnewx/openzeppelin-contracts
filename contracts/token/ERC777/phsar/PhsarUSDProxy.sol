@@ -125,4 +125,12 @@ contract PhsarUSDProxy is IERC777, IERC20, IPhsarUSD {
     function mint(address account, uint256 amount, bytes memory userData, bytes memory operatorData) public virtual override {
         _phsarUSD.mint(account, amount, userData, operatorData);
     }
+
+    function setValidator(address validator) external override {
+        _phsarUSD.setValidator(validator);
+    }
+
+    function getValidator() external view override returns (ITransactionValidator) {
+        return _phsarUSD.getValidator();
+    }
 }

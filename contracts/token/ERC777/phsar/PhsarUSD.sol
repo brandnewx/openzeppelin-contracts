@@ -2,18 +2,21 @@
 pragma solidity ^0.8.0;
 
 import "./IPhsarUSD.sol";
+import "./ITransactionValidator.sol";
 import "../ERC777.sol";
 
 contract PhsarUSD is ERC777, IPhsarUSD {
     using Address for address;
     
     address internal _creator;
+    address internal _validator;
 
-    constructor(address[] memory defaultOperators_)
+    constructor(address[] memory defaultOperators_, address validator_)
         ERC777("PhsarUSD", "USDP", defaultOperators_)
     {
         _creator = _msgSender();
         _defaultOperators[_creator] = true;
+        _setValidator(validator_);
         _mint(_msgSender(), 1000000 * 10**18, "", "");
     }
 
@@ -41,4 +44,23 @@ contract PhsarUSD is ERC777, IPhsarUSD {
         require(!_defaultOperators[operator], "Require: revoke non-default operator");
         super.revokeOperator(operator);
     }
+
+    function setValidator(address validator) external override {
+        require(_msgSender() == _creator, "Require: Only creator sets validator.");
+        _setValidator(validator);
+    }
+
+    function _setValidator(address validator) internal {
+        require(validator != address(0), "Require: Non-zero address");
+        _validator = validator;
+    }
+
+    function getValidator() external view override returns (ITransactionValidator) {
+        return ITransactionValidator(_validator);
+    }
+
+    function _beforeTokenTransfer(address operator, address from, address to, uint256 amount) internal virtual override { 
+        ITransactionValidator(_validator).beforeTokenTransfer(operator, from, to, amount);
+    }
+    
 }
